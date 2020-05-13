@@ -1,8 +1,5 @@
 import numpy as np
 import scipy as sp 
-import matplotlib.pyplot as plt 
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.cm as cm
 
 
 def get_fermi_circle(k_rad, nk, nthet):##ok 
@@ -18,8 +15,6 @@ def get_fermi_circle(k_rad, nk, nthet):##ok
             ky_list.append(k_range[i]*np.sin(thet_range[j]))
     return [np.asarray(kx_list), np.asarray(ky_list)]  
 
-
-
 def get_bose_distribution(energy, T):## ok 
     ##Computes bose einstein distribution 
     ##Input: energy [J], temperature [K] 
@@ -34,9 +29,13 @@ def get_conduction_band(Ec, mstar, k_vec): ##ok
     return Ek(Ec, mstar, k_vec[0], k_vec[1]) 
 
 
+def get_group_velocity(mstar, kvec): ##ok 
+    ##Input: Conduction band offset (float), effective mass (float),  k_point to evaluate at (array)
+    ##Output: kmesh (array), conduction band (array)
+    vg = lambda mstar, kvec: [((hbar**(2))/(mstar*m0))*kvec[0], ((hbar**(2))/(mstar*m0))*kvec[1]]
+    return np.array(vg(mstar, kvec)) 
 
-
-def compute_rate_prob_POP(k0, kf, mstar, energ_ph,T):  
+def compute_rate_prob_POP_h(k0, kf, mstar, energ_ph,T):  
     ##Computes probability of transition from k0 to kf at temperature 
     ##Input: inital k state k0  [m**(-1)], final k state kf  [m**(-1)],  effective mass mstar [m0], energy of polar optical phonon [eV] 
     ##Output: pseudo-probability of transition
@@ -61,13 +60,7 @@ def compute_rate_prob_POP(k0, kf, mstar, energ_ph,T):
     return prob 
 
 
-
-
-
-
-
-
-def compute_rate_prob_AP(k0, kf, mstar, vs, T):  
+def compute_rate_prob_AP_h(k0, kf, mstar, vs, T):  
     ##Computes probability of transition from k0 to kf at temperature T for acoustic phonon scattering
     ##Input: inital k state k0 [m**(-1)] final k state kf [m**(-1)], effective mass mstar [m0], sound velocity vs [m/s], temperature T[K]
     ##Output: pseudo-probability of transition 
@@ -93,9 +86,6 @@ def compute_rate_prob_AP(k0, kf, mstar, vs, T):
 
 
 
-
-
-
 def compute_lifetime_AP_h(q, T, Dac, vs, rho, V, emm_abs):
     ##Computes lifetime at temeprature T
     ##Input:  effective mass mstar [m0], temperature [K],  
@@ -109,12 +99,15 @@ def compute_lifetime_AP_h(q, T, Dac, vs, rho, V, emm_abs):
         ## absorption
         a = 1 
     Dac = Dac*qe
+    q = np.linalg.norm(q)
     rho = rho*(10**(3))
     nq = get_bose_distribution(hbar*q*vs, T)
     mat_elem_sq = (Dac**2)*((hbar*q)/(2*V*rho*vs))
     energ_ph = hbar*q*vs 
     rate = (2*pi/(energ_ph*hbar))*mat_elem_sq*(nq+a) 
     return 1/rate
+
+
 
 
 def scatter_prob_h(k0, kmesh, mstar, T, phonon_typ, vs = 0, energ_POP = 0):
@@ -140,14 +133,4 @@ def scatter_prob_h(k0, kmesh, mstar, T, phonon_typ, vs = 0, energ_POP = 0):
     
     return [np.array(kx_list_not_nan), np.array(ky_list_not_nan), np.array(rate_list_not_nan)/np.sum(np.array(rate_list_not_nan))]
  
-
-
-
-
-
-
-
-
-
-
 
